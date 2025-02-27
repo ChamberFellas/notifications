@@ -1,0 +1,82 @@
+#%RAML 1.0
+title: Notifications API
+version: v1
+baseUri: http://localhost:3000
+protocols: [ HTTP ]
+
+/notifications:
+  /bills:
+    get:
+      description: Get a list of stored notifications (maybe for user to see past notifications, or for debugging)
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                [
+                  {
+                    "id": 1,
+                    "title": "Bill Deadline",
+                    "message": "Rent is due tomorrow at 16:00.",
+                    "timestamp": "2025-02-18T18:00:00Z"
+                  }
+                ]
+    post:
+      description: Create a new notification
+      body:
+        application/json:
+          example: |
+            {
+              "title": "Bill Name",
+              "message": "You have been assigned Bill Name.",
+              "deadline": "2025-02-25T16:00:00Z"
+            }
+      responses:
+        201:
+          body:
+            application/json:
+              example: |
+                {
+                  "id": 1,
+                  "title": "Bill Name",
+                  "message": "You have been assigned Bill Name.",
+                  "timestamp": "2025-02-18T18:00:00Z"
+                }
+
+/chores:
+  get:
+    description: Get a list of stored notifications (maybe for user to see past notifications, or for debugging)
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              [
+                {
+                  "id": 1,
+                  "title": "Chore Deadline",
+                  "message": "Chore 'Wash Dishes' is due tomorrow at 16:00.",
+                  "timestamp": "2025-02-18T18:00:00Z"
+                }
+              ]
+  post:
+    description: Create a new notification
+    body:
+      application/json:
+        example: |
+          {
+            "title": "Chore Name",
+            "message": "You have been assigned Chore Name.",
+            "deadline": "2025-02-25T16:00:00Z"
+          }
+    responses:
+      201:
+        body:
+          application/json:
+            example: |
+              {
+                "id": 1,
+                "title": "Chore Name",
+                "message": "You have been assigned Chore Name.",
+                "timestamp": "2025-02-18T18:00:00Z"
+              }

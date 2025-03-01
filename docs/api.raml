@@ -16,9 +16,11 @@ protocols: [ HTTP ]
                 [
                   {
                     "id": 1,
-                    "title": "Bill Deadline",
-                    "message": "Rent is due tomorrow at 16:00.",
-                    "timestamp": "2025-02-18T18:00:00Z"
+                    "title": "Bill Name",
+                    "assigned to": "Bob",
+                    "amount": 10,
+                    "creation timestamp": "2025-02-18T18:00:00Z",
+                    "deadline timestamp": "2025-02-22T18:00:00Z"
                   }
                 ]
     post:
@@ -28,7 +30,8 @@ protocols: [ HTTP ]
           example: |
             {
               "title": "Bill Name",
-              "message": "You have been assigned Bill Name.",
+              "assigned to": "Bob",
+              "amount": 10,
               "deadline": "2025-02-25T16:00:00Z"
             }
       responses:
@@ -37,10 +40,10 @@ protocols: [ HTTP ]
             application/json:
               example: |
                 {
-                  "id": 1,
                   "title": "Bill Name",
-                  "message": "You have been assigned Bill Name.",
-                  "timestamp": "2025-02-18T18:00:00Z"
+                  "assigned to": "Bob",
+                  "amount": 10,
+                  "deadline": "2025-02-18T18:00:00Z"
                 }
 
 /chores:
@@ -54,9 +57,10 @@ protocols: [ HTTP ]
               [
                 {
                   "id": 1,
-                  "title": "Chore Deadline",
-                  "message": "Chore 'Wash Dishes' is due tomorrow at 16:00.",
-                  "timestamp": "2025-02-18T18:00:00Z"
+                  "title": "Chore Name",
+                  "assigned to": "Billy",
+                  "deadline timestamp": "2025-02-22T18:00:00Z",
+                  "creation timestamp": "2025-02-18T18:00:00Z"
                 }
               ]
   post:
@@ -66,8 +70,8 @@ protocols: [ HTTP ]
         example: |
           {
             "title": "Chore Name",
-            "message": "You have been assigned Chore Name.",
-            "deadline": "2025-02-25T16:00:00Z"
+            "assigned to": "Billy",
+            "deadline timestamp": "2025-02-25T16:00:00Z"
           }
     responses:
       201:
@@ -75,8 +79,7 @@ protocols: [ HTTP ]
           application/json:
             example: |
               {
-                "id": 1,
                 "title": "Chore Name",
-                "message": "You have been assigned Chore Name.",
-                "timestamp": "2025-02-18T18:00:00Z"
+                "assigned to": "Billy",
+                "deadline timestamp": "2025-02-18T18:00:00Z"
               }

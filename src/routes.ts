@@ -7,19 +7,24 @@ router.get("/status", (_, res) => {
   res.status(200).json({ status: "OK" });
 });
 
-router.get('/notifications', async (req, res) => {
+router.get('/chores', async (req, res) => {
   try {
+      // replace mock-chores with chore database address
       const response = await axios.get('http://localhost:3000/mock-chores');
       const chores = response.data;
 
-      const notifications = chores.map((chore: { choreName: string; personAssigned: string; }) => ({
-          choreName: chore.choreName,
-          personAssigned: chore.personAssigned,
-          notification: `Chore: ${chore.choreName} is assigned to ${chore.personAssigned}`
+      const notifications = chores.map((chore: { title: string; assignedTo: string; deadline: Date; isComplete: boolean;}) => ({
+          choreName: chore.title,
+          assignedTo: chore.assignedTo,
+          deadline: new Date(chore.deadline),
+          isComplete: chore.isComplete
       }));
+
+      console.log('Converted Chores:', notifications);
 
       res.json(notifications);
   } catch (error) {
+      console.error('Error fetching chore data:', error);
       res.status(500).json({ error: 'Failed to fetch chore data' });
   }
 });
@@ -30,12 +35,15 @@ router.get('/bills', async (req, res) => {
       const response = await axios.get('http://localhost:3000/mock-bills');
       const bills = response.data;
 
-      const notifications = bills.map((bill: { billName: string; amount: number; dueDate: string; }) => ({
-          billName: bill.billName,
+      const notifications = bills.map((bill: { title: string; assignedTo: string; amount: number; deadline: Date; isComplete: boolean; }) => ({
+          billName: bill.title,
+          assignedTo: bill.assignedTo,
           amount: bill.amount,
-          dueDate: bill.dueDate,
-          notification: `Bill: ${bill.billName} of amount $${bill.amount} is due on ${bill.dueDate}`
+          deadline: new Date(bill.deadline),
+          isComplete: bill.isComplete
       }));
+      
+      console.log('Converted Chores:', notifications);
 
       res.json(notifications);
   } catch (error) {
@@ -43,9 +51,10 @@ router.get('/bills', async (req, res) => {
   }
 });
 
-router.post('/greet', (req, res) => {
+router.post('/chores', (req, res) => {
   const { name } = req.body;
   res.json({ message: 'Hello ${name}!'});
+  // set chore = req.body, and then put on database with an id. database for bills and chores separate.
 });
 
 export default router;

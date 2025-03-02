@@ -3,6 +3,21 @@ import axios from "axios";
 
 const router = Router();
 
+type Chore = {
+  title: string;
+  assignedTo: string;
+  deadline: Date;
+  isComplete: boolean;
+};
+
+type Bill = {
+  title: string;
+  assignedTo: string;
+  amount: number;
+  deadline: Date;
+  isComplete: boolean;
+};
+
 router.get("/status", (_, res) => {
   res.status(200).json({ status: "OK" });
 });
@@ -52,9 +67,18 @@ router.get('/bills', async (req, res) => {
 });
 
 router.post('/chores', (req, res) => {
-  const { name } = req.body;
+  const { chore: Chore } = req.body;
+  // check chore is correct
+  // post chore onto database with id
   res.json({ message: 'Hello ${name}!'});
-  // set chore = req.body, and then put on database with an id. database for bills and chores separate.
 });
+
+router.post('/bills', (req, res) => {
+  const { bill: Bill } = req.body;
+  // check bill is correct
+  // post bill onto database with id
+  res.json({ message: 'Hello ${name}!'});
+});
+
 
 export default router;

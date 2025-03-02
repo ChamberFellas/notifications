@@ -17,10 +17,9 @@ protocols: [ HTTP ]
                   {
                     "id": 1,
                     "title": "Bill Name",
-                    "assigned to": "Bob",
+                    "assignedTo": "Bob",
                     "amount": 10,
-                    "creation timestamp": "2025-02-18T18:00:00Z",
-                    "deadline timestamp": "2025-02-22T18:00:00Z"
+                    "deadline": "2025-02-22T18:00:00Z"
                   }
                 ]
     post:
@@ -32,7 +31,8 @@ protocols: [ HTTP ]
               "title": "Bill Name",
               "assigned to": "Bob",
               "amount": 10,
-              "deadline": "2025-02-25T16:00:00Z"
+              "deadline": "2025-02-25T16:00:00Z",
+              "isComplete": true
             }
       responses:
         201:
@@ -41,9 +41,10 @@ protocols: [ HTTP ]
               example: |
                 {
                   "title": "Bill Name",
-                  "assigned to": "Bob",
+                  "assignedTo": "Bob",
                   "amount": 10,
-                  "deadline": "2025-02-18T18:00:00Z"
+                  "deadline": "2025-02-18T18:00:00Z",
+                  "isComplete": true
                 }
 
 /chores:
@@ -58,9 +59,9 @@ protocols: [ HTTP ]
                 {
                   "id": 1,
                   "title": "Chore Name",
-                  "assigned to": "Billy",
-                  "deadline timestamp": "2025-02-22T18:00:00Z",
-                  "creation timestamp": "2025-02-18T18:00:00Z"
+                  "assignedTo": "Billy",
+                  "deadline": "2025-02-22T18:00:00Z",
+                  "isComplete": false
                 }
               ]
   post:
@@ -70,8 +71,8 @@ protocols: [ HTTP ]
         example: |
           {
             "title": "Chore Name",
-            "assigned to": "Billy",
-            "deadline timestamp": "2025-02-25T16:00:00Z"
+            "assignedTo": "Billy",
+            "deadline": "2025-02-25T16:00:00Z"
           }
     responses:
       201:
@@ -80,6 +81,6 @@ protocols: [ HTTP ]
             example: |
               {
                 "title": "Chore Name",
-                "assigned to": "Billy",
-                "deadline timestamp": "2025-02-18T18:00:00Z"
+                "assignedTo": "Billy",
+                "deadline": "2025-02-18T18:00:00Z"
               }

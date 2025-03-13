@@ -4,11 +4,13 @@ dotenv.config();
 import router from "./routes";
 import axios from "axios";
 import cron from 'node-cron';
+import Chore from './choreModel';
 
 export const app = express();
 
 app.use(express.json());
 app.use(router);
+
 
 if (process.env.NODE_ENV !== "test") {
   if (!process.env.PORT) {
@@ -110,3 +112,5 @@ cron.schedule('* * * * *', () => {
 });
 // Do we want a notification for when someone completes a task?
 // Notif when an incomplete task passes its deadline
+
+export { Chore }

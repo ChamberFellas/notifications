@@ -4,4 +4,9 @@ module.exports = {
   testEnvironment: "node",
   testMatch: ["**/unit/*.spec.ts"],
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  globals: {
+    "ts-jest": {
+      tsconfig: "tsconfig.json" 
+    }
+  }
 };

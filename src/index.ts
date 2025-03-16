@@ -6,6 +6,8 @@ import axios from "axios";
 import cron from 'node-cron';
 import Chore from './choreModel';
 
+import * as this_module from './index';
+
 export const app = express();
 
 app.use(express.json());
@@ -43,7 +45,7 @@ app.get('/mock-bills', (req: Request, res: Response) => {
 
 import { Types } from 'mongoose';
 
-interface Chore {
+export interface Chore {
   _id: Types.ObjectId; // MongoDB ObjectId for unique identification
   userID: Types.ObjectId[]; // Array of user IDs as references to the 'users' collection
   houseID: Types.ObjectId[]; // Array of house IDs as references to the 'house' collection
@@ -56,7 +58,7 @@ interface Chore {
   verifiedCount: number; // Optional, defaults to 0
 }
 
-type Bill = {
+export type Bill = {
   title: string;
   assignedTo: string;
   amount: number;
@@ -64,7 +66,7 @@ type Bill = {
   isComplete: boolean;
 };
 
-const fetchChores = async () => {
+export const fetchChores = async () => {
   try {
       const choresResponse = await axios.get('http://localhost:3000/chores');
 
@@ -76,7 +78,7 @@ const fetchChores = async () => {
   }
 };
 
-const fetchBills = async () => {
+export const fetchBills = async () => {
   try {
       const billsResponse = await axios.get('http://localhost:3000/bills');
 
@@ -89,9 +91,9 @@ const fetchBills = async () => {
 };
 
 
-const pollNotifs = async () => {
-    const chores = await fetchChores();
-    const bills = await fetchBills();
+export const pollNotifs = async () => {
+    const chores = await this_module.fetchChores();
+    const bills = await this_module.fetchBills();
 
     if (chores && bills){
       const incompleteChores = chores.filter((chore: Chore) => chore.status=='incomplete');

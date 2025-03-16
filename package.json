@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^6.4.17",
     "axios": "^1.8.1",
     "mongoose": "^8.12.1",
     "node-cron": "^3.0.3",

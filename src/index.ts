@@ -41,12 +41,20 @@ app.get('/mock-bills', (req: Request, res: Response) => {
   res.json(mockBills);
 });
 
-type Chore = {
-  title: string;
-  assignedTo: string;
-  deadline: Date;
-  isComplete: boolean;
-};
+import { Types } from 'mongoose';
+
+interface Chore {
+  _id: Types.ObjectId; // MongoDB ObjectId for unique identification
+  userID: Types.ObjectId[]; // Array of user IDs as references to the 'users' collection
+  houseID: Types.ObjectId[]; // Array of house IDs as references to the 'house' collection
+  description: string; // Optional string with a max length of 50
+  deadline: Date; // Deadline for the chore
+  dateAssigned: Date; // Optional, defaults to the current date if not provided
+  repeatEvery?: number; // Optional, defaults to 0 (minimum value is 0)
+  status: 'incomplete' | 'complete'; // Optional, defaults to "incomplete", restricted to these two values
+  completionAdded: Date | null; // Optional, represents the date of chore completion
+  verifiedCount: number; // Optional, defaults to 0
+}
 
 type Bill = {
   title: string;
@@ -86,7 +94,7 @@ const pollNotifs = async () => {
     const bills = await fetchBills();
 
     if (chores && bills){
-      const incompleteChores = chores.filter((chore: Chore) => !chore.isComplete);
+      const incompleteChores = chores.filter((chore: Chore) => chore.status=='incomplete');
       const incompleteBills = bills.filter((bill: Bill) => !bill.isComplete);
 
       const currentDateTime: Date = new Date();
@@ -112,5 +120,30 @@ cron.schedule('* * * * *', () => {
 });
 // Do we want a notification for when someone completes a task?
 // Notif when an incomplete task passes its deadline
+
+const testPostChore = async () => {
+  const chore = {
+    _id: new Types.ObjectId(), // Automatically generates a MongoDB ObjectId
+    userID: [new Types.ObjectId(), new Types.ObjectId()], // Example array of user IDs
+    houseID: [new Types.ObjectId()], // Example array of house IDs
+    description: 'Clean the windows', // String description within max length
+    deadline: new Date('2025-03-20'), // Set a specific deadline
+    dateAssigned: new Date(), // Defaults to the current date
+    repeatEvery: 7, // Repeat every 7 days (optional)
+    status: 'incomplete', // Status is either "incomplete" or "complete"
+    completionAdded: null, // Not yet completed
+    verifiedCount: 0 // Initial verified count
+  };
+
+  try {
+      const response = await axios.post('http://localhost:3000/chores', { chore });
+      console.log('Response:', response.data);
+  } catch (error: any) {
+      console.error('Error:', error.response?.data || error.message);
+  }
+};
+
+// Call the test function (you can comment this out later)
+testPostChore();
 
 export { Chore }

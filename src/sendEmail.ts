@@ -1,7 +1,9 @@
 import { Types } from "mongoose";
 import dotenv from "dotenv";
+import BillModel from './billModel';
+import ChoreModel from "./choreModel";
 dotenv.config();
-import { user } from "./users"; // need to replace this with appropriate db address
+//import { user } from "./users"; // need to replace this with appropriate endpoint
 
 import nodemailer from "nodemailer";
 
@@ -36,7 +38,7 @@ export async function sendNotification(emails: string[]){
     try {
         for (const email of emails) {
             const mailOptions = {
-                from: "13felix.blakemore@gmail.com", // Sender's email address
+                from: process.env.EMAIL_USER, // Sender's email address
                 to: email, // Recipient's email address
                 subject: "Chore Notification", // Email subject
                 text: "You have been assigned a new chore. Please check your dashboard for details!", // Email body
@@ -50,7 +52,7 @@ export async function sendNotification(emails: string[]){
     }
 }
 
-const testEmails = ["fb720@bath.ac.uk", "13felix.blakemore@gmail.com"];
+const testEmails = ["fm819@bath.ac.uk", "13felix.blakemore@gmail.com"];
 sendNotification(testEmails)
 
 

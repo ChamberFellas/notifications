@@ -19,7 +19,7 @@ const billSchema = new mongoose.Schema({
     }, 
     Deadline: {
         type: Date,
-        required: false 
+        required: true
     },
     Recurring: {
         type: String,

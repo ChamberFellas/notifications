@@ -5,6 +5,7 @@ import router from "./routes";
 import axios from "axios";
 import cron from 'node-cron';
 import Chore from './choreModel';
+import { sendNotification } from "./sendEmail";
 
 export const app = express();
 
@@ -23,24 +24,6 @@ if (process.env.NODE_ENV !== "test") {
   });
 }
 
-app.get('/mock-chores', (req: Request, res: Response) => {
-    const mockChores = [
-        { title: 'Wash Dishes', assignedTo: 'Shmeelix', deadline: new Date('2025-02-22T18:00:00Z'), isComplete: false },
-        { title: 'Clean kitchen', assignedTo: 'Max', deadline: new Date('2025-02-22T18:00:00Z'), isComplete: true },
-        { title: 'Clean toilet', assignedTo: 'Finn', deadline: new Date('2025-02-22T18:00:00Z'), isComplete: true }
-    ];
-    res.json(mockChores);
-});
-
-app.get('/mock-bills', (req: Request, res: Response) => {
-  const mockBills = [
-      { title: 'Rent', assignedTo: 'Bob', amount: '1500' , deadline: new Date('2025-02-22T18:00:00Z'), isComplete: false},
-      { title: 'Gas', assignedTo: 'Bob', amount: '50' , deadline: new Date('2025-02-22T18:00:00Z'), isComplete: true},
-      { title: 'Water', assignedTo: 'Bob', amount: '30' , deadline: new Date('2025-02-22T18:00:00Z'), isComplete: true}
-  ];
-  res.json(mockBills);
-});
-
 import { Types } from 'mongoose';
 
 interface Chore {
@@ -56,13 +39,17 @@ interface Chore {
   verifiedCount: number; // Optional, defaults to 0
 }
 
-type Bill = {
-  title: string;
-  assignedTo: string;
-  amount: number;
-  deadline: Date;
-  isComplete: boolean;
-};
+interface Bill {
+  _id: Types.ObjectId;
+  Item: string;
+  Payee: Types.ObjectId;
+  Amount: number;
+  Payors: Types.ObjectId[];
+  Status: 'Unpaid' | 'Paid' | 'Confirmed';
+  Deadline: Date;
+  Recurring?: 'Weekly' | 'Biweekly' | 'Monthly' | 'None';
+  Flag?: boolean;
+}
 
 const fetchChores = async () => {
   try {
@@ -95,7 +82,7 @@ const pollNotifs = async () => {
 
     if (chores && bills){
       const incompleteChores = chores.filter((chore: Chore) => chore.status=='incomplete');
-      const incompleteBills = bills.filter((bill: Bill) => !bill.isComplete);
+      const incompleteBills = bills.filter((bill: Bill) => bill.Status=='Unpaid');
 
       const currentDateTime: Date = new Date();
       const upcomingChores = incompleteChores.filter((chore: Chore) => {
@@ -109,6 +96,20 @@ const pollNotifs = async () => {
         }
         return (deadline.getTime() - currentDateTime.getTime() < 86400000);})
       console.log("Upcoming Chores:", upcomingChores)
+      // await sendNotification(upcomingChores)
+
+      const upcomingBills = incompleteBills.filter((bill: Bill) => {
+        console.log('Bill Deadline:', bill.Deadline, 'Type:', typeof bill.Deadline);
+        let deadline: Date;
+
+        if (typeof bill.Deadline === "string") {
+            deadline = new Date(bill.Deadline);
+        } else {
+            deadline = bill.Deadline;
+        }
+        return (deadline.getTime() - currentDateTime.getTime() < 86400000);})
+      console.log("Upcoming Bills:", upcomingBills)
+      // await sendNotification(upcomingBills)
     } else {
       console.error('Error fetching');
     }

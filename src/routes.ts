@@ -2,8 +2,9 @@ import { Router } from "express";
 import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
-import choreModel from './choreModel'; 
-import mongoose from 'mongoose';
+import choreModel from './choreModel';
+import BillModel from './billModel'; 
+import mongoose, { Mongoose } from 'mongoose';
 import { Types } from 'mongoose';
 import { getUserEmailById, sendNotification } from "./sendEmail";
 const router = Router();
@@ -38,14 +39,19 @@ mongoose.connect(FULL_MONGO_URL, {
     verifiedCount: number; // Optional, defaults to 0
   }
   
+  interface Bill {
+    _id: Types.ObjectId;
+    Item: string;
+    Payee: Types.ObjectId;
+    Amount: number;
+    Payors: Types.ObjectId[];
+    Status: 'Unpaid' | 'Paid' | 'Confirmed';
+    Deadline: Date;
+    Recurring?: 'Weekly' | 'Biweekly' | 'Monthly' | 'None';
+    Flag?: boolean;
+  }
 
-type Bill = {
-  title: string;
-  assignedTo: string;
-  amount: number;
-  deadline: Date;
-  isComplete: boolean;
-};
+
 
 router.get("/status", (_, res) => {
   res.status(200).json({ status: "OK" });
@@ -89,26 +95,31 @@ router.get('/chores', async (req, res) => {
   }
 });
 
+
 // Route to fetch and send notifications for bills
 router.get('/bills', async (req, res) => {
   try {
-      const response = await axios.get('http://localhost:3000/mock-bills');
-      const bills = response.data;
+    // replace mock-chores with chore database address
+    const bills: Bill[] = await BillModel.find() //mongoose
+    const notifications = bills.map((bill: Bill) => ({
+      billID: bill._id, // Mapping _id to choreID for clarity in notifications
+      Item: bill.Item,
+      Payee: bill.Payee, // User IDs associated with the chore
+      Amount: bill.Amount,
+      Payors: bill.Payors, // House IDs related to the chore
+      Status: bill.Status, // Default to empty if not provided
+      Deadline: new Date(bill.Deadline), // Ensuring Date format
+      Recurring: bill.Recurring, // Default to current date
+      Flag: bill.Flag, // Default to 0
+    }));
+    
+    console.log('Bills:', notifications);
 
-      const notifications = bills.map((bill: { title: string; assignedTo: string; amount: number; deadline: Date; isComplete: boolean; }) => ({
-          billName: bill.title,
-          assignedTo: bill.assignedTo,
-          amount: bill.amount,
-          deadline: new Date(bill.deadline),
-          isComplete: bill.isComplete
-      }));
-      
-      console.log('Bills:', notifications);
-
-      res.json(notifications);
-  } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch bill data' });
-  }
+    res.json(notifications);
+} catch (error) {
+    console.error('Error fetching bill data:', error);
+    res.status(500).json({ error: 'Failed to fetch bill data' });
+}
 });
 
 router.post('/chores', async (req, res) => {
@@ -137,13 +148,30 @@ router.post('/chores', async (req, res) => {
   }
 });
 
-router.post('/bills', (req, res) => {
-  const { bill: Bill } = req.body;
-  // check bill is correct
-  // post bill onto database with id
-  // send email notif
-  res.json({ message: 'Hello ${name}!'});
-});
+router.post('/bills', async (req, res) => {
+  const { bill } = req.body; // Retrieve the chore object from the request body
 
+  try {
+      // Create a new instance of the Chore model with the data
+      const newBill = new BillModel(bill);
+
+      // Save the new chore to the database
+      await newBill.save();
+      const emails = await Promise.all(
+        newBill.Payors.map(async (Payors) => await getUserEmailById(Payors))
+    );
+
+    // Filter out any null values (in case some users don't exist)
+    const validEmails = emails.filter((email): email is string => email !== null);
+    await sendNotification(validEmails);
+      // Send a response back to the client with the saved chore
+      res.status(201).json(newBill);
+      // send email notif of Chore
+      // how do i get the users email? query the user database with the user id and get the email.
+  } catch (error) {
+      // Handle any errors during the save operation
+      res.status(500).json({ error: 'Failed to save chore'});
+  }
+});
 
 export default router;

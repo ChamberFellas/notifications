@@ -44,27 +44,52 @@ const transporter = nodemailer.createTransport({
 export async function getUserEmailById(userID: Types.ObjectId): Promise<string | null> {
     try {
         // Query the database for the user by ID
-        const userDoc = await user.findById(userID).select("email"); // Select only the email field
+        //const userDoc = await user.findById(userID).select("email"); // Select only the email field
 
         // If the user document is found, return the email
-        if (userDoc) {
-            return userDoc.email; // Assuming email is a string in your schema
-        }
+        //if (userDoc) {
+          //  return userDoc.email; // Assuming email is a string in your schema
+        //}
 
         // If no user is found, return null
-        return null;
+        return "13felix.blakemore@gmail.com";
     } catch (error) {
         console.error("Error fetching user email:", error);
         throw error; // Optionally propagate the error
     }
 }
 
-export async function sendNotification(emails: string[], chore?: Chore, bill?: Bill){
+export async function sendNotification(chore?: Chore, bill?: Bill){
     try {
+        const emails: string[] = []; // Initialize an empty array to store emails
+        if (chore){
+            for (const id of chore.userID) {
+                const email = await getUserEmailById(id); // Retrieve the email for the current user ID
+                if (email) {
+                    emails.push(email); // Add the email to the array
+                }
+            }
+        } else if (bill){
+            for (const id of bill.Payors) {
+                const email = await getUserEmailById(id); // Retrieve the email for the current user ID
+                if (email) {
+                    emails.push(email); // Add the email to the array
+                }
+            }
+        } else{
+            throw new Error("No bill and no Chore");
+        }
         for (const email of emails) {
-            // Check if chore or bill is provided
+            
             if (chore) {
-                const formattedDate = chore.deadline.toLocaleDateString("en-GB", {
+                // Check if chore or bill is provided
+                const deadline = new Date(chore.deadline); // Ensure it's a Date object
+
+                // Check if the deadline is a valid date
+                if (isNaN(deadline.getTime())) {
+                    throw new Error(`Invalid deadline: ${chore.deadline}`);
+                }
+                const formattedDate = deadline.toLocaleDateString("en-GB", {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
@@ -80,7 +105,14 @@ export async function sendNotification(emails: string[], chore?: Chore, bill?: B
                 const info = await transporter.sendMail(mailOptions);
                 console.log(`Email sent to ${email}: ${info.response}`);
             } else if (bill) {
-                const formattedDate = bill.Deadline.toLocaleDateString("en-GB", {
+                // Check if chore or bill is provided
+                const deadline = new Date(bill.Deadline); // Ensure it's a Date object
+
+                // Check if the deadline is a valid date
+                if (isNaN(deadline.getTime())) {
+                    throw new Error(`Invalid deadline: ${deadline}`);
+                }
+                const formattedDate = deadline.toLocaleDateString("en-GB", {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
@@ -130,7 +162,7 @@ const testBill: Bill = {
     Deadline: new Date('2025-03-25')
   };
 
-sendNotification(testEmails, undefined, testBill);
-sendNotification(testEmails, testChore)
+//sendNotification(undefined, testBill);
+//sendNotification(testChore)
 
 

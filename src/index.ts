@@ -96,7 +96,16 @@ const pollNotifs = async () => {
         }
         return (deadline.getTime() - currentDateTime.getTime() < 86400000);})
       console.log("Upcoming Chores:", upcomingChores)
+      if (upcomingChores){
+        for (const chore of upcomingChores){
+          sendNotification(chore);
+        }
+      }
       // await sendNotification(upcomingChores)
+      // sendNotification should accept upcomingChores list and then iterate through,
+      // by userID retrieve emails,
+      // compose notif with chore.deadline and chore.description
+      // send emails 
 
       const upcomingBills = incompleteBills.filter((bill: Bill) => {
         console.log('Bill Deadline:', bill.Deadline, 'Type:', typeof bill.Deadline);
@@ -119,6 +128,7 @@ cron.schedule('* * * * *', () => {
   console.log('Running a task every minute');
   pollNotifs();
 });
+// polls chores that are coming up, but sends a notif every minute.
 // Do we want a notification for when someone completes a task?
 // Notif when an incomplete task passes its deadline
 

@@ -59,7 +59,6 @@ router.get("/status", (_, res) => {
 
 router.get('/chores', async (req, res) => {
   try {
-      // replace mock-chores with chore database address
       const chores: Chore[] = await choreModel.find() //mongoose
       const notifications = chores.map((chore :{
         _id: mongoose.Types.ObjectId,
@@ -74,16 +73,16 @@ router.get('/chores', async (req, res) => {
       verifiedCount: number;
 
       }) => ({
-        choreID: chore._id, // Mapping _id to choreID for clarity in notifications
-        userID: chore.userID, // User IDs associated with the chore
-        houseID: chore.houseID, // House IDs related to the chore
-        description: chore.description || '', // Default to empty if not provided
-        deadline: new Date(chore.deadline), // Ensuring Date format
-        dateAssigned: chore.dateAssigned || new Date(), // Default to current date
-        repeatEvery: chore.repeatEvery || 0, // Default to 0 if not provided
-        status: chore.status || 'incomplete', // Default to "incomplete"
-        completionAdded: chore.completionAdded || null, // Null if not provided
-        verifiedCount: chore.verifiedCount || 0, // Default to 0
+        choreID: chore._id, 
+        userID: chore.userID,
+        houseID: chore.houseID,
+        description: chore.description || '', 
+        deadline: new Date(chore.deadline), 
+        dateAssigned: chore.dateAssigned || new Date(), 
+        repeatEvery: chore.repeatEvery || 0, 
+        status: chore.status || 'incomplete',
+        completionAdded: chore.completionAdded || null, 
+        verifiedCount: chore.verifiedCount || 0,
       }));
       
       console.log('Chores:', notifications);
@@ -131,13 +130,9 @@ router.post('/chores', async (req, res) => {
 
       // Save the new chore to the database
       await newChore.save();
-      const emails = await Promise.all(
-        newChore.userID.map(async (userID) => await getUserEmailById(userID))
-    );
 
     // Filter out any null values (in case some users don't exist)
-    const validEmails = emails.filter((email): email is string => email !== null);
-    await sendNotification(validEmails);
+    await sendNotification(chore);
       // Send a response back to the client with the saved chore
       res.status(201).json(newChore);
       // send email notif of Chore
@@ -157,14 +152,7 @@ router.post('/bills', async (req, res) => {
 
       // Save the new chore to the database
       await newBill.save();
-      const emails = await Promise.all(
-        newBill.Payors.map(async (Payors) => await getUserEmailById(Payors))
-    );
-
-    // Filter out any null values (in case some users don't exist)
-    const validEmails = emails.filter((email): email is string => email !== null);
-    await sendNotification(validEmails);
-      // Send a response back to the client with the saved chore
+      await sendNotification(undefined, bill);
       res.status(201).json(newBill);
       // send email notif of Chore
       // how do i get the users email? query the user database with the user id and get the email.

@@ -138,7 +138,7 @@ const testPostChore = async () => {
     userID: [new Types.ObjectId(), new Types.ObjectId()], // Example array of user IDs
     houseID: [new Types.ObjectId()], // Example array of house IDs
     description: 'Clean the windows', // String description within max length
-    deadline: new Date('2025-03-20'), // Set a specific deadline
+    deadline: new Date('2025-03-29'), // Set a specific deadline
     dateAssigned: new Date(), // Defaults to the current date
     repeatEvery: 7, // Repeat every 7 days (optional)
     status: 'incomplete', // Status is either "incomplete" or "complete"

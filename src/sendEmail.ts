@@ -2,6 +2,7 @@ import { Types } from "mongoose";
 import dotenv from "dotenv";
 import BillModel from './billModel';
 import ChoreModel from "./choreModel";
+import axios from 'axios';
 dotenv.config();
 //import { user } from "./users"; // need to replace this with appropriate endpoint
 
@@ -64,7 +65,10 @@ export async function sendNotification(chore?: Chore, bill?: Bill){
         const emails: string[] = []; // Initialize an empty array to store emails
         if (chore){
             for (const id of chore.userID) {
-                const email = await getUserEmailById(id); // Retrieve the email for the current user ID
+                const stringID = id.toString();
+                console.log('http://172.26.53.145:3000/get-email/:' + stringID);
+                const response = await axios.get('http://172.26.53.145:3000/get-email/' + stringID); // Retrieve the email for the current user ID
+                const email = response.data;
                 if (email) {
                     emails.push(email); // Add the email to the array
                 }

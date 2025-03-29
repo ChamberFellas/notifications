@@ -7,6 +7,7 @@ import BillModel from './billModel';
 import mongoose, { Mongoose } from 'mongoose';
 import { Types } from 'mongoose';
 import { getUserEmailById, sendNotification } from "./sendEmail";
+import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 const router = Router();
 
 const MONGO_URL = process.env.MONGOURL || ''; // Fallback to default if MONGOURL is undefined
@@ -122,17 +123,19 @@ router.get('/bills', async (req, res) => {
 });
 
 router.post('/chores', async (req, res) => {
-  const { chore } = req.body; // Retrieve the chore object from the request body
-
+  const chore = req.body; // Retrieve the chore object from the request body
+  console.log(chore)
   try {
       // Create a new instance of the Chore model with the data
       const newChore = new choreModel(chore);
-
+      console.log(chore);
+      console.log(newChore);
       // Save the new chore to the database
       await newChore.save();
+      console.log("YIPPEE");
 
     // Filter out any null values (in case some users don't exist)
-    await sendNotification(chore);
+    //await sendNotification(chore);
       // Send a response back to the client with the saved chore
       res.status(201).json(newChore);
       // send email notif of Chore

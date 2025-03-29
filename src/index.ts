@@ -18,9 +18,11 @@ if (process.env.NODE_ENV !== "test") {
     console.error("PORT is not defined");
     console.log("Setting port to default: 3000");
   }
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  const PORT = 3000;
+  const HOST = process.env.IP_ADDRESS || '0.0.0.0'; // Replace with your local IP address
+
+  app.listen(PORT, HOST, () => {
+  console.log(`Server running at http://${HOST}:${PORT}`);
   });
 }
 
@@ -53,7 +55,7 @@ interface Bill {
 
 const fetchChores = async () => {
   try {
-      const choresResponse = await axios.get('http://localhost:3000/chores');
+      const choresResponse = await axios.get('http://172.26.92.10:3000/chores');
 
       const chores: Chore[] = choresResponse.data;
 
@@ -65,7 +67,7 @@ const fetchChores = async () => {
 
 const fetchBills = async () => {
   try {
-      const billsResponse = await axios.get('http://localhost:3000/bills');
+      const billsResponse = await axios.get('http://172.26.92.10:3000/bills');
 
       const bills: Bill[]  = billsResponse.data;
 
@@ -118,7 +120,11 @@ const pollNotifs = async () => {
         }
         return (deadline.getTime() - currentDateTime.getTime() < 86400000);})
       console.log("Upcoming Bills:", upcomingBills)
-      // await sendNotification(upcomingBills)
+      if (upcomingBills){
+        for (const bill of upcomingBills){
+          sendNotification(undefined, bill);
+        }
+      }
     } else {
       console.error('Error fetching');
     }
@@ -126,11 +132,16 @@ const pollNotifs = async () => {
 
 cron.schedule('* * * * *', () => {
   console.log('Running a task every minute');
-  pollNotifs();
+  //pollNotifs();
 });
 // polls chores that are coming up, but sends a notif every minute.
-// Do we want a notification for when someone completes a task?
+// Do we want a notification for when someone completes a task
+// notif when flagged
 // Notif when an incomplete task passes its deadline
+// notif when new chore assigned to you: Done
+// notif when within a day of deadline
+
+// delete notifs after a month?
 
 const testPostChore = async () => {
   const chore = {
@@ -147,14 +158,13 @@ const testPostChore = async () => {
   };
 
   try {
-      const response = await axios.post('http://localhost:3000/chores', { chore });
+      const response = await axios.post('http://172.26.92.10:3000/chores', { chore });
       console.log('Response:', response.data);
   } catch (error: any) {
       console.error('Error:', error.response?.data || error.message);
   }
 };
 
-// Call the test function (you can comment this out later)
-testPostChore();
+//testPostChore();
 
 export { Chore }

@@ -75,7 +75,10 @@ export async function sendNotification(chore?: Chore, bill?: Bill){
             }
         } else if (bill){
             for (const id of bill.Payors) {
-                const email = await getUserEmailById(id); // Retrieve the email for the current user ID
+                const stringID = id.toString();
+                console.log('http://172.26.53.145:3000/get-email/:' + stringID);
+                const response = await axios.get('http://172.26.53.145:3000/get-email/' + stringID); // Retrieve the email for the current user ID
+                const email = response.data;
                 if (email) {
                     emails.push(email); // Add the email to the array
                 }

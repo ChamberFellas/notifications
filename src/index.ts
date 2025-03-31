@@ -4,58 +4,33 @@ dotenv.config();
 import router from "./routes";
 import axios from "axios";
 import cron from 'node-cron';
-import Chore from './choreModel';
+import ChoreModel from './choreModel';
 import { sendNotification } from "./sendEmail";
+import { Types } from 'mongoose';
+import { Bill, Chore } from './interfaces';
 
 export const app = express();
 
 app.use(express.json());
 app.use(router);
 
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.IP_ADDRESS || '0.0.0.0';
 
 if (process.env.NODE_ENV !== "test") {
   if (!process.env.PORT) {
     console.error("PORT is not defined");
     console.log("Setting port to default: 3000");
   }
-  const PORT = 3000;
-  const HOST = process.env.IP_ADDRESS || '0.0.0.0'; // Replace with your local IP address
 
   app.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}`);
   });
 }
 
-import { Types } from 'mongoose';
-
-interface Chore {
-  _id: Types.ObjectId; // MongoDB ObjectId for unique identification
-  userID: Types.ObjectId[]; // Array of user IDs as references to the 'users' collection
-  houseID: Types.ObjectId[]; // Array of house IDs as references to the 'house' collection
-  description: string; // Optional string with a max length of 50
-  deadline: Date; // Deadline for the chore
-  dateAssigned: Date; // Optional, defaults to the current date if not provided
-  repeatEvery?: number; // Optional, defaults to 0 (minimum value is 0)
-  status: 'incomplete' | 'complete'; // Optional, defaults to "incomplete", restricted to these two values
-  completionAdded: Date | null; // Optional, represents the date of chore completion
-  verifiedCount: number; // Optional, defaults to 0
-}
-
-interface Bill {
-  _id: Types.ObjectId;
-  Item: string;
-  Payee: Types.ObjectId;
-  Amount: number;
-  Payors: Types.ObjectId[];
-  Status: 'Unpaid' | 'Paid' | 'Confirmed';
-  Deadline: Date;
-  Recurring?: 'Weekly' | 'Biweekly' | 'Monthly' | 'None';
-  Flag?: boolean;
-}
-
 const fetchChores = async () => {
   try {
-      const choresResponse = await axios.get('http://172.26.92.10:3000/chores');
+      const choresResponse = await axios.get(`http://${HOST}:${PORT}/chores`);
 
       const chores: Chore[] = choresResponse.data;
 
@@ -67,7 +42,7 @@ const fetchChores = async () => {
 
 const fetchBills = async () => {
   try {
-      const billsResponse = await axios.get('http://172.26.92.10:3000/bills');
+      const billsResponse = await axios.get(`http://${HOST}:${PORT}/bills`);
 
       const bills: Bill[]  = billsResponse.data;
 
@@ -103,11 +78,6 @@ const pollNotifs = async () => {
           sendNotification(chore);
         }
       }
-      // await sendNotification(upcomingChores)
-      // sendNotification should accept upcomingChores list and then iterate through,
-      // by userID retrieve emails,
-      // compose notif with chore.deadline and chore.description
-      // send emails 
 
       const upcomingBills = incompleteBills.filter((bill: Bill) => {
         console.log('Bill Deadline:', bill.Deadline, 'Type:', typeof bill.Deadline);
@@ -145,26 +115,42 @@ cron.schedule('* * * * *', () => {
 
 const testPostChore = async () => {
   const chore = {
-    _id: new Types.ObjectId(), // Automatically generates a MongoDB ObjectId
-    userID: [new Types.ObjectId(), new Types.ObjectId()], // Example array of user IDs
-    houseID: [new Types.ObjectId()], // Example array of house IDs
-    description: 'Clean the windows', // String description within max length
-    deadline: new Date('2025-03-29'), // Set a specific deadline
-    dateAssigned: new Date(), // Defaults to the current date
-    repeatEvery: 7, // Repeat every 7 days (optional)
-    status: 'incomplete', // Status is either "incomplete" or "complete"
-    completionAdded: null, // Not yet completed
-    verifiedCount: 0 // Initial verified count
+    _id: new Types.ObjectId(),
+    userID: [new Types.ObjectId(), new Types.ObjectId()],
+    houseID: [new Types.ObjectId()],
+    description: 'Clean the windows',
+    deadline: new Date('2025-03-29'),
+    dateAssigned: new Date(),
+    repeatEvery: 7,
+    status: 'incomplete',
+    completionAdded: null, 
+    verifiedCount: 0 
   };
 
   try {
-      const response = await axios.post('http://172.26.92.10:3000/chores', { chore });
+      const response = await axios.post(`http://${HOST}:${PORT}/chores`, { chore });
       console.log('Response:', response.data);
   } catch (error: any) {
       console.error('Error:', error.response?.data || error.message);
   }
 };
 
-//testPostChore();
+const testPostBill = async () => {
+  const bill = {
+    _id: new Types.ObjectId(), 
+    Item: 'Rent',
+    Payee: new Types.ObjectId(),
+    Amount: 100,
+    Payors: [new Types.ObjectId()],
+    Status: 'Unpaid',
+    Deadline: new Date('2025-04-05'),
+    Recurring: 'None',
+  };
 
-export { Chore }
+  try {
+      const response = await axios.post(`http://${HOST}:${PORT}/bills`, { bill });
+      console.log('Response:', response.data);
+  } catch (error: any) {
+      console.error('Error:', error.response?.data || error.message);
+  }
+};

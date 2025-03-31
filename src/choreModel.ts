@@ -6,7 +6,7 @@ const choreSchema = new mongoose.Schema({
     houseID: [{ type: mongoose.Schema.Types.ObjectId, ref: 'house' }],
     description:{
         type: String,
-        required: false,
+        required: true,
         maxLength: 50,
     },
     deadline: {

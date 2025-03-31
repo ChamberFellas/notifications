@@ -26,10 +26,6 @@ const billSchema = new mongoose.Schema({
         enum: ['Weekly', 'Biweekly', 'Monthly', 'None'], 
         required: false
     },
-    Flag: {
-        type: Boolean,
-        required: false
-    }
   });
 
 const BillModel = mongoose.model('Bill', billSchema);

@@ -86,6 +86,7 @@ router.get('/bills', async (req, res) => {
 router.post('/chores', async (req, res) => {
   const { chore } = req.body;
   try {
+      chore.notificationSent = false;
       // Create a new instance of the Chore model with the data
       const newChore = new choreModel(chore);
 
@@ -93,7 +94,8 @@ router.post('/chores', async (req, res) => {
       await newChore.save();
       console.log("YIPPEE");
 
-      await sendNotification(chore);
+      await sendNotification("new", chore);
+      chore.notificationSent = true;
       res.status(201).json(newChore);
   } catch (error) {
       console.error('Failed to save chore', error);
@@ -109,7 +111,7 @@ router.post('/bills', async (req, res) => {
 
       // Save the new chore to the database
       await newBill.save();
-      await sendNotification(undefined, bill);
+      await sendNotification("new", undefined, bill);
       res.status(201).json(newBill);
   } catch (error) {
       // Handle any errors during the save operation

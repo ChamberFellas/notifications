@@ -24,3 +24,5 @@ import BillModel from "./billModel";
     Deadline: Date;
     Recurring?: 'Weekly' | 'Biweekly' | 'Monthly' | 'None';
   }
+
+  export type notifType = "new" | "reminder" | "deadline"

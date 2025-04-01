@@ -4,7 +4,7 @@ dotenv.config();
 import router from "./routes";
 import axios from "axios";
 import cron from 'node-cron';
-import ChoreModel from './choreModel';
+import choreModel from './choreModel';
 import { sendNotification } from "./sendEmail";
 import { Types } from 'mongoose';
 import { Bill, Chore } from './interfaces';
@@ -65,7 +65,6 @@ const pollNotifs = async () => {
       const upcomingChores = incompleteChores.filter((chore: Chore) => {
         console.log('Chore Deadline:', chore.deadline, 'Type:', typeof chore.deadline);
         let deadline: Date;
-
         if (typeof chore.deadline === "string") {
             deadline = new Date(chore.deadline);
         } else {
@@ -75,7 +74,7 @@ const pollNotifs = async () => {
       console.log("Upcoming Chores:", upcomingChores)
       if (upcomingChores){
         for (const chore of upcomingChores){
-          sendNotification(chore);
+          sendNotification("reminder", chore);
         }
       }
 
@@ -92,7 +91,7 @@ const pollNotifs = async () => {
       console.log("Upcoming Bills:", upcomingBills)
       if (upcomingBills){
         for (const bill of upcomingBills){
-          sendNotification(undefined, bill);
+          sendNotification("reminder", undefined, bill);
         }
       }
     } else {
@@ -100,9 +99,23 @@ const pollNotifs = async () => {
     }
 };
 
+// Schedule the task to run at midnight every day
+cron.schedule('0 0 * * *', async () => {
+  try {
+    // Reset notificationSent to false for all chores
+    await choreModel.updateMany(
+      { notificationSent: true }, // Find all chores where the flag is true
+      { $set: { notificationSent: false } } // Set the flag to false
+    );
+    console.log('Reset notificationSent flag for all chores.');
+  } catch (error: any) {
+    console.error('Failed to reset notificationSent flag:', error.message);
+  }
+});
+
 cron.schedule('* * * * *', () => {
   console.log('Running a task every minute');
-  //pollNotifs();
+  pollNotifs();
 });
 // polls chores that are coming up, but sends a notif every minute.
 // Do we want a notification for when someone completes a task

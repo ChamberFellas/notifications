@@ -5,8 +5,11 @@ import ChoreModel from "./choreModel";
 import axios from 'axios';
 import { Bill, Chore } from './interfaces'
 dotenv.config();
+import { notifType } from "./interfaces";
 //import { user } from "./users"; // need to replace this with appropriate endpoint
 import nodemailer from "nodemailer";
+const PORT = process.env.USER_PORT
+const HOST= process.env.USER_HOST
 
 const transporter = nodemailer.createTransport({
     service: "gmail", // Use "gmail" or another provider like "outlook"
@@ -35,14 +38,17 @@ export async function getUserEmailById(userID: Types.ObjectId): Promise<string |
     }
 }
 
-export async function sendNotification(chore?: Chore, bill?: Bill){
+export async function sendNotification(type: notifType, chore?: Chore, bill?: Bill){
     try {
+        if (type == "deadline"){
+            // then do this notif type
+        }
         const emails: string[] = []; // Initialize an empty array to store emails
         if (chore){
             for (const id of chore.userID) {
                 const stringID = id.toString();
-                console.log('http://172.26.53.145:3000/get-email/:' + stringID);
-                const response = await axios.get('http://172.26.53.145:3000/get-email/' + stringID); // Retrieve the email for the current user ID
+                console.log(`http://${HOST}:${PORT}/get-email/:` + stringID);
+                const response = await axios.get(`http://${HOST}:${PORT}/get-email/` + stringID); // Retrieve the email for the current user ID
                 const email = response.data;
                 if (email) {
                     emails.push(email); // Add the email to the array
@@ -51,8 +57,8 @@ export async function sendNotification(chore?: Chore, bill?: Bill){
         } else if (bill){
             for (const id of bill.Payors) {
                 const stringID = id.toString();
-                console.log('http://172.26.53.145:3000/get-email/:' + stringID);
-                const response = await axios.get('http://172.26.53.145:3000/get-email/' + stringID); // Retrieve the email for the current user ID
+                console.log(`http://${HOST}:${PORT}/get-email/:` + stringID);
+                const response = await axios.get(`http://${HOST}:${PORT}/get-email/` + stringID); // Retrieve the email for the current user ID
                 const email = response.data;
                 if (email) {
                     emails.push(email); // Add the email to the array
@@ -81,9 +87,23 @@ export async function sendNotification(chore?: Chore, bill?: Bill){
                     from: process.env.EMAIL_USER, // Sender's email address
                     to: email, // Recipient's email address
                     subject: "Chore Notification", // Email subject
-                    text: `You have been assigned a new chore: ${chore.description}, due on ${formattedDate}. Please check ChamberFellas for details!`, // Email body
+                    text: `You have missed your deadline for: ${chore.description}, due on ${formattedDate}. Please check ChamberFellas for details!`, // Email body
                 };
-        
+                if (type=="new"){
+                    const mailOptions = {
+                        from: process.env.EMAIL_USER, // Sender's email address
+                        to: email, // Recipient's email address
+                        subject: "Chore Notification", // Email subject
+                        text: `You have been assigned a new chore: ${chore.description}, due on ${formattedDate}. Please check ChamberFellas for details!`, // Email body
+                    };
+                } else if (type=="reminder"){
+                    const mailOptions = {
+                        from: process.env.EMAIL_USER, // Sender's email address
+                        to: email, // Recipient's email address
+                        subject: "Chore Notification", // Email subject
+                        text: `Remember to complete: ${chore.description}, due on ${formattedDate}. Please check ChamberFellas for details!`, // Email body
+                    };
+                }
                 const info = await transporter.sendMail(mailOptions);
                 console.log(`Email sent to ${email}: ${info.response}`);
             } else if (bill) {
@@ -106,7 +126,6 @@ export async function sendNotification(chore?: Chore, bill?: Bill){
                     subject: "Bill Notification", // Email subject
                     text: `You have a new bill, ${bill.Item}, due on ${formattedDate}. Please make the payment on time.`, // Email body
                 };
-        
                 const info = await transporter.sendMail(mailOptions);
                 console.log(`Email sent to ${email}: ${info.response}`);
             } else {
@@ -143,8 +162,5 @@ const testBill: Bill = {
     Status: 'Unpaid',
     Deadline: new Date('2025-03-25')
   };
-
-//sendNotification(undefined, testBill);
-//sendNotification(testChore)
 
 

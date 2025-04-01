@@ -1,0 +1,86 @@
+#%RAML 1.0
+title: Notifications API
+version: v1
+baseUri: http://localhost:3000
+protocols: [ HTTP ]
+
+/notifications:
+  /bills:
+    get:
+      description: Get a list of stored notifications (maybe for user to see past notifications, or for debugging)
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                [
+                  {
+                    "id": 1,
+                    "title": "Bill Name",
+                    "assignedTo": "Bob",
+                    "amount": 10,
+                    "deadline": "2025-02-22T18:00:00Z"
+                  }
+                ]
+    post:
+      description: Create a new notification
+      body:
+        application/json:
+          example: |
+            {
+              "title": "Bill Name",
+              "assigned to": "Bob",
+              "amount": 10,
+              "deadline": "2025-02-25T16:00:00Z",
+              "isComplete": true
+            }
+      responses:
+        201:
+          body:
+            application/json:
+              example: |
+                {
+                  "title": "Bill Name",
+                  "assignedTo": "Bob",
+                  "amount": 10,
+                  "deadline": "2025-02-18T18:00:00Z",
+                  "isComplete": true
+                }
+
+/chores:
+  get:
+    description: Get a list of stored notifications (maybe for user to see past notifications, or for debugging)
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              [
+                {
+                  "id": 1,
+                  "title": "Chore Name",
+                  "assignedTo": "Billy",
+                  "deadline": "2025-02-22T18:00:00Z",
+                  "isComplete": false
+                }
+              ]
+  post:
+    description: Create a new notification
+    body:
+      application/json:
+        example: |
+          {
+            "title": "Chore Name",
+            "assignedTo": "Billy",
+            "deadline": "2025-02-25T16:00:00Z"
+          }
+    responses:
+      201:
+        body:
+          application/json:
+            example: |
+              {
+                "title": "Chore Name",
+                "assignedTo": "Billy",
+                "deadline": "2025-02-18T18:00:00Z"
+              }

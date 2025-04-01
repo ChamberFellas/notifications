@@ -1,12 +1,48 @@
+# README for Code Editor Project
 
+## Overview
+This README provides guidance for setting up, configuring, and using the Notifications microservice. This communicates with the other services and receives REST requests to send notifications to users.
 
-Add dockerhub credentials to github secrets as
-DOCKERHUB_USERNAME
-DOCKERHUB_PASSKEY
+## Table of Contents
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
 
-Add dockerhub repositories needed for integration tests in .github/workflows/int-test-stage.yml
+## Installation
+```bash
+# Clone the repository
+git clone https://github.com/ChamberFellas/notifications.git
 
-To generate Kubernetes deployment files for a microservice, run:
-python3 scripts/gen_kube.py <service_name>
+# Navigate to the project directory
+cd notifications
 
-Ensure the <service_name> mathches the github repo name as this is used within the github actions to deploy to dockerhub
+# Install dependencies
+yarn
+```
+
+## Configuration
+1. Create a `.env` file in the root directory
+2. Add your configuration variables:
+   ```
+   MONGO_URI=mongodb://localhost:27017/notifications
+   USERS_URL=http://localhost:3001/users
+   BILLS_URL=http://localhost:3002/bills
+   ```
+
+# Build with Docker
+
+docker build -t notifications .
+
+docker run -d -p 3000:3000 notifications
+
+## Usage
+```bash
+
+# Build for production
+yarn build
+
+# Start the production server
+yarn start
+```
+
+Visit `http://localhost:3000` for the endpoints

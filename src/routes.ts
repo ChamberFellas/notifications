@@ -7,7 +7,6 @@ import BillModel from './billModel';
 import mongoose, { Mongoose } from 'mongoose';
 import { Types } from 'mongoose';
 import { getUserEmailById, sendNotification } from "./sendEmail";
-import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 import { Bill, Chore } from "./interfaces"
 
 const router = Router();

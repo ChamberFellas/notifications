@@ -136,6 +136,7 @@ export async function sendNotification(type: notifType, chore?: Chore, bill?: Bi
         console.error("Error sending notifications:", error);
         throw error; // Optionally rethrow the error
     }
+
 }
 
 const testEmails = ["fm819@bath.ac.uk", "13felix.blakemore@gmail.com"];
@@ -162,5 +163,4 @@ const testBill: Bill = {
     Status: 'Unpaid',
     Deadline: new Date('2025-03-25')
   };
-
 

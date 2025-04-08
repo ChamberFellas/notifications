@@ -17,6 +17,7 @@ app.use(router);
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.IP_ADDRESS || '0.0.0.0';
 
+
 if (process.env.NODE_ENV !== "test") {
   if (!process.env.PORT) {
     console.error("PORT is not defined");
@@ -24,7 +25,7 @@ if (process.env.NODE_ENV !== "test") {
   }
 
   app.listen(PORT, HOST, () => {
-  console.log(`Server running at http://${HOST}:${PORT}`);
+    console.log(`Server running at http://${HOST}:${PORT}`);
   });
 }
 
